@@ -1,0 +1,1085 @@
+import { Phone, Truck, DollarSign, Shield, Facebook, Instagram, MessageCircle, UtensilsCrossed, Cookie, Sandwich, ChevronDown, ShoppingCart, X, Plus, Minus, Trash2, ArrowLeft, ChevronLeft, ChevronRight, Menu as MenuIcon, Home } from "lucide-react";
+import { useState } from "react";
+import Slider from "react-slick";
+import { MenuNasiBox } from "./components/MenuNasiBox";
+import { MenuSnackBox } from "./components/MenuSnackBox";
+import { MenuSnackSatuan } from "./components/MenuSnackSatuan";
+
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  category: string;
+}
+
+export default function App() {
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const sliderSettings = {
+    dots: true,
+    infinite: true,
+    speed: 800,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: true,
+    autoplay: true,
+    autoplaySpeed: 4000,
+    pauseOnHover: true,
+    fade: true,
+    cssEase: 'ease-in-out',
+    nextArrow: <NextArrow />,
+    prevArrow: <PrevArrow />,
+  };
+
+  const nasiBoxImages = [
+    {
+      url: "https://images.unsplash.com/photo-1569058242252-623df46b5025?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      caption: "Nasi Putih dengan Ayam Goreng"
+    },
+    {
+      url: "https://images.unsplash.com/photo-1705088293300-8fc8c7be90e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      caption: "Paket Nasi Komplit"
+    },
+    {
+      url: "https://images.unsplash.com/photo-1647093953000-9065ed6f85ef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      caption: "Nasi dengan Sayuran Fresh"
+    },
+  ];
+
+  const snackImages = [
+    {
+      url: "https://images.unsplash.com/photo-1655689712221-59a7dd6a01f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      caption: "Berbagai Pilihan Snack"
+    },
+    {
+      url: "https://images.unsplash.com/photo-1655689711629-84ba33584064?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      caption: "Snack Box Kemasan"
+    },
+  ];
+
+  const snackSatuanImages = [
+    {
+      url: "https://images.unsplash.com/photo-1658373072934-d96e583a44f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      caption: "Gorengan Crispy"
+    },
+    {
+      url: "https://images.unsplash.com/photo-1676700310614-600f2aa255ef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      caption: "Aneka Snack Favorit"
+    },
+    {
+      url: "https://images.unsplash.com/photo-1566361892779-6afb6bca7052?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      caption: "Gorengan Fresh"
+    },
+    {
+      url: "https://images.unsplash.com/photo-1740727262951-17ef2eff39f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      caption: "Cemilan Enak"
+    },
+  ];
+
+  const addToCart = (item: Omit<CartItem, "quantity">) => {
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((i) => i.id === item.id);
+      if (existingItem) {
+        return prevCart.map((i) =>
+          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      }
+      return [...prevCart, { ...item, quantity: 1 }];
+    });
+    setIsCartOpen(true);
+  };
+
+  const removeFromCart = (id: string) => {
+    setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+  };
+
+  const updateQuantity = (id: string, change: number) => {
+    setCart((prevCart) =>
+      prevCart
+        .map((item) =>
+          item.id === id ? { ...item, quantity: Math.max(0, item.quantity + change) } : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
+  const getTotalPrice = () => {
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
+
+  const sendWhatsAppOrder = () => {
+    const orderText = cart
+      .map((item) => `${item.quantity}x ${item.name} - Rp ${(item.price * item.quantity).toLocaleString("id-ID")}`)
+      .join("\n");
+    const total = getTotalPrice();
+    const message = `Halo, saya mau pesan:\n\n${orderText}\n\n*Total: Rp ${total.toLocaleString("id-ID")}*\n\nMohon kirimkan detail rekening untuk pembayaran. Terima kasih!`;
+    const whatsappUrl = `https://wa.me/6288200860059?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
+  return <AppContent
+    activeCategory={activeCategory}
+    setActiveCategory={setActiveCategory}
+    cart={cart}
+    isCartOpen={isCartOpen}
+    setIsCartOpen={setIsCartOpen}
+    isMobileMenuOpen={isMobileMenuOpen}
+    setIsMobileMenuOpen={setIsMobileMenuOpen}
+    addToCart={addToCart}
+    removeFromCart={removeFromCart}
+    updateQuantity={updateQuantity}
+    getTotalPrice={getTotalPrice}
+    sendWhatsAppOrder={sendWhatsAppOrder}
+    sliderSettings={sliderSettings}
+    nasiBoxImages={nasiBoxImages}
+    snackImages={snackImages}
+    snackSatuanImages={snackSatuanImages}
+  />;
+}
+
+function NextArrow(props: any) {
+  const { onClick } = props;
+  return (
+    <button
+      onClick={onClick}
+      className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all"
+    >
+      <ChevronRight className="w-6 h-6 text-[#1a2332]" />
+    </button>
+  );
+}
+
+function PrevArrow(props: any) {
+  const { onClick } = props;
+  return (
+    <button
+      onClick={onClick}
+      className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all"
+    >
+      <ChevronLeft className="w-6 h-6 text-[#1a2332]" />
+    </button>
+  );
+}
+
+interface AppContentProps {
+  activeCategory: string;
+  setActiveCategory: (category: string) => void;
+  cart: CartItem[];
+  isCartOpen: boolean;
+  setIsCartOpen: (open: boolean) => void;
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (open: boolean) => void;
+  addToCart: (item: Omit<CartItem, "quantity">) => void;
+  removeFromCart: (id: string) => void;
+  updateQuantity: (id: string, change: number) => void;
+  getTotalPrice: () => number;
+  sendWhatsAppOrder: () => void;
+  sliderSettings: any;
+  nasiBoxImages: { url: string; caption: string }[];
+  snackImages: { url: string; caption: string }[];
+  snackSatuanImages: { url: string; caption: string }[];
+}
+
+function AppContent({
+  activeCategory,
+  setActiveCategory,
+  cart,
+  isCartOpen,
+  setIsCartOpen,
+  isMobileMenuOpen,
+  setIsMobileMenuOpen,
+  addToCart,
+  removeFromCart,
+  updateQuantity,
+  getTotalPrice,
+  sendWhatsAppOrder,
+  sliderSettings,
+  nasiBoxImages,
+  snackImages,
+  snackSatuanImages,
+}: AppContentProps) {
+
+  return (
+    <div className="min-h-screen bg-[#1a2332] relative">
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 right-0 bg-[#1a2332]/95 backdrop-blur-sm border-b border-white/10 z-50 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            {/* Logo */}
+            <a href="#" className="flex items-center gap-3 group">
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                <div className="text-[#1a2332] text-[8px] text-center leading-tight">
+                  <div className="font-bold">QUEENSA</div>
+                  <div className="text-[6px]">CATERING</div>
+                </div>
+              </div>
+              <div className="hidden sm:block">
+                <h2 className="text-[#d4a574] text-xl">Queensa Catering</h2>
+                <p className="text-white/60 text-xs">Solusi Katering Mahasiswa</p>
+              </div>
+            </a>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#hero" className="text-white/80 hover:text-[#d4a574] transition-colors flex items-center gap-2 text-sm">
+                <Home className="w-4 h-4" />
+                Home
+              </a>
+              <a href="#menu" className="text-white/80 hover:text-[#d4a574] transition-colors flex items-center gap-2 text-sm">
+                <UtensilsCrossed className="w-4 h-4" />
+                Menu
+              </a>
+              <a href="#why-choose-us" className="text-white/80 hover:text-[#d4a574] transition-colors text-sm">
+                Kenapa Kami
+              </a>
+              <a href="#how-to-order" className="text-white/80 hover:text-[#d4a574] transition-colors text-sm">
+                Cara Pesan
+              </a>
+              <a
+                href="https://wa.me/6288200860059"
+                className="text-white/80 hover:text-[#d4a574] transition-colors flex items-center gap-2 text-sm"
+              >
+                <Phone className="w-4 h-4" />
+                Kontak
+              </a>
+            </div>
+
+            {/* Cart & Mobile Menu Button */}
+            <div className="flex items-center gap-4">
+              {/* Cart Button */}
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-2 hover:bg-white/10 rounded-full transition-colors"
+                aria-label="Keranjang Belanja"
+              >
+                <ShoppingCart className="w-6 h-6 text-[#d4a574]" />
+                {cart.length > 0 && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
+                  </div>
+                )}
+              </button>
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden p-2 hover:bg-white/10 rounded-lg transition-colors"
+                aria-label="Menu"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-6 h-6 text-white" />
+                ) : (
+                  <MenuIcon className="w-6 h-6 text-white" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Menu */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden py-4 border-t border-white/10">
+              <div className="flex flex-col gap-4">
+                <a
+                  href="#hero"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-white/80 hover:text-[#d4a574] transition-colors flex items-center gap-3 py-2"
+                >
+                  <Home className="w-5 h-5" />
+                  Home
+                </a>
+                <a
+                  href="#menu"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-white/80 hover:text-[#d4a574] transition-colors flex items-center gap-3 py-2"
+                >
+                  <UtensilsCrossed className="w-5 h-5" />
+                  Menu
+                </a>
+                <a
+                  href="#why-choose-us"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-white/80 hover:text-[#d4a574] transition-colors py-2"
+                >
+                  Kenapa Kami
+                </a>
+                <a
+                  href="#how-to-order"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-white/80 hover:text-[#d4a574] transition-colors py-2"
+                >
+                  Cara Pesan
+                </a>
+                <a
+                  href="https://wa.me/6288200860059"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-white/80 hover:text-[#d4a574] transition-colors flex items-center gap-3 py-2"
+                >
+                  <Phone className="w-5 h-5" />
+                  Kontak
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
+
+      {/* Floating Cart Button (Mobile) */}
+      <button
+        onClick={() => setIsCartOpen(true)}
+        className="md:hidden fixed bottom-6 right-6 z-40 w-16 h-16 bg-[#d4a574] rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform duration-300 group"
+        aria-label="Keranjang Belanja"
+      >
+        <ShoppingCart className="w-8 h-8 text-white group-hover:animate-bounce" />
+        {cart.length > 0 && (
+          <div className="absolute -top-2 -right-2 w-7 h-7 bg-red-500 rounded-full flex items-center justify-center">
+            <span className="text-white text-sm">{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
+          </div>
+        )}
+      </button>
+
+      {/* Cart Sidebar */}
+      <div
+        className={`fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-2xl z-[100] transform transition-transform duration-300 ${
+          isCartOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="bg-[#d4a574] text-white p-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <ShoppingCart className="w-6 h-6" />
+              <h3>Keranjang Belanja</h3>
+            </div>
+            <button
+              onClick={() => setIsCartOpen(false)}
+              className="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-full transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Cart Items */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {cart.length === 0 ? (
+              <div className="text-center py-12">
+                <ShoppingCart className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-500">Keranjang belanja kosong</p>
+                <p className="text-sm text-gray-400 mt-2">Pilih menu untuk mulai memesan</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {cart.map((item) => (
+                  <div key={item.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h4 className="text-sm text-gray-800 mb-1">{item.name}</h4>
+                        <p className="text-[#d4a574]">Rp {item.price.toLocaleString("id-ID")}</p>
+                      </div>
+                      <button
+                        onClick={() => removeFromCart(item.id)}
+                        className="text-red-500 hover:text-red-700 p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 bg-white rounded-full border border-gray-300">
+                        <button
+                          onClick={() => updateQuantity(item.id, -1)}
+                          className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors"
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
+                        <span className="text-sm min-w-[20px] text-center">{item.quantity}</span>
+                        <button
+                          onClick={() => updateQuantity(item.id, 1)}
+                          className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <p className="text-gray-800">
+                        Rp {(item.price * item.quantity).toLocaleString("id-ID")}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Footer with Total and Order Button */}
+          <div className="border-t border-gray-200 p-6 bg-gray-50">
+            {cart.length > 0 ? (
+              <>
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="text-gray-800">Rp {getTotalPrice().toLocaleString("id-ID")}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-lg mb-4">
+                    <span className="text-gray-800">Total</span>
+                    <span className="text-[#d4a574]">Rp {getTotalPrice().toLocaleString("id-ID")}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={sendWhatsAppOrder}
+                  className="w-full bg-[#25D366] text-white py-4 rounded-full hover:bg-[#20BA5A] transition-colors shadow-lg flex items-center justify-center gap-2 mb-3"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Pesan via WhatsApp
+                </button>
+                <button
+                  onClick={() => setIsCartOpen(false)}
+                  className="w-full bg-white text-[#d4a574] border-2 border-[#d4a574] py-3 rounded-full hover:bg-[#d4a574]/10 transition-colors flex items-center justify-center gap-2"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  Pilih Menu Lain
+                </button>
+                <p className="text-xs text-center text-gray-500 mt-3">
+                  Anda akan diarahkan ke WhatsApp untuk menyelesaikan pesanan
+                </p>
+              </>
+            ) : (
+              <button
+                onClick={() => setIsCartOpen(false)}
+                className="w-full bg-[#d4a574] text-white py-4 rounded-full hover:bg-[#c49563] transition-colors flex items-center justify-center gap-2"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                Mulai Belanja
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Overlay */}
+      {isCartOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-[90]"
+          onClick={() => setIsCartOpen(false)}
+        ></div>
+      )}
+
+      {/* Decorative Leaves */}
+      <div className="fixed top-0 left-0 w-64 h-64 opacity-30 pointer-events-none z-0">
+        <svg viewBox="0 0 200 200" className="w-full h-full">
+          <path
+            d="M20,100 Q40,40 80,20 Q120,40 140,100 Q120,160 80,180 Q40,160 20,100"
+            fill="#7fb069"
+            opacity="0.6"
+          />
+          <path
+            d="M30,110 Q50,60 85,45 Q115,60 130,110"
+            fill="#a4c49c"
+            opacity="0.4"
+          />
+        </svg>
+      </div>
+      <div className="fixed top-0 right-0 w-64 h-64 opacity-30 pointer-events-none z-0 transform scale-x-[-1]">
+        <svg viewBox="0 0 200 200" className="w-full h-full">
+          <path
+            d="M20,100 Q40,40 80,20 Q120,40 140,100 Q120,160 80,180 Q40,160 20,100"
+            fill="#7fb069"
+            opacity="0.6"
+          />
+          <path
+            d="M30,110 Q50,60 85,45 Q115,60 130,110"
+            fill="#a4c49c"
+            opacity="0.4"
+          />
+        </svg>
+      </div>
+
+      {/* Hero Section */}
+      <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden py-20 px-4 pt-32">
+        {/* Hero Content */}
+        <div className="relative z-10 text-center max-w-5xl mx-auto">
+          {/* Logo Circle */}
+          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
+            <div className="text-[#1a2332] text-xs">
+              <div>QUEENSA</div>
+              <div className="text-[8px]">CATERING</div>
+            </div>
+          </div>
+
+          <h1 className="text-6xl md:text-8xl mb-6 text-[#d4a574] drop-shadow-lg" style={{ fontFamily: 'serif' }}>
+            HARGA MENU
+          </h1>
+          <p className="text-2xl md:text-3xl mb-16 text-white/90 italic">
+            Queensa Catering
+          </p>
+
+          <p className="text-lg md:text-xl mb-12 text-[#d4a574]/90 max-w-2xl mx-auto">
+            Solusi Katering Praktis Mahasiswa & Kampus
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <a
+              href="https://wa.me/6288200860059"
+              className="inline-block bg-[#d4a574] text-[#1a2332] px-12 py-4 rounded-full hover:bg-[#c49563] transition-all duration-300 shadow-2xl transform hover:scale-105"
+            >
+              ORDER HERE!
+            </a>
+            <a
+              href="#menu"
+              className="inline-block bg-white/10 text-white px-12 py-4 rounded-full hover:bg-white/20 transition-all duration-300 border-2 border-white/30 backdrop-blur-sm"
+            >
+              Lihat Menu
+            </a>
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <a href="#menu" className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 cursor-pointer group">
+          <div className="w-6 h-10 border-2 border-[#d4a574]/50 rounded-full flex justify-center group-hover:border-[#d4a574] transition-colors">
+            <div className="w-1 h-3 bg-[#d4a574]/70 rounded-full mt-2 animate-bounce group-hover:bg-[#d4a574]"></div>
+          </div>
+        </a>
+      </section>
+
+      {/* Quick Category Overview */}
+      <section className="py-16 px-4 bg-gradient-to-b from-[#1a2332] to-[#1e2838]">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Nasi Box Card */}
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 cursor-pointer" onClick={() => { setActiveCategory("nasibox"); document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" }); }}>
+              <div className="w-16 h-16 bg-[#d4a574] rounded-full flex items-center justify-center mb-4 mx-auto">
+                <Sandwich className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-center mb-2 text-white">Nasi Box</h4>
+              <p className="text-center text-white/70 text-sm mb-3">Paket nasi lengkap dengan lauk pilihan</p>
+              <div className="text-center">
+                <span className="bg-[#d4a574]/20 text-[#d4a574] px-4 py-1 rounded-full text-sm">
+                  Mulai Rp 15.000
+                </span>
+              </div>
+            </div>
+
+            {/* Snack Box Card */}
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 cursor-pointer" onClick={() => { setActiveCategory("snackbox"); document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" }); }}>
+              <div className="w-16 h-16 bg-[#7fb069] rounded-full flex items-center justify-center mb-4 mx-auto">
+                <Cookie className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-center mb-2 text-white">Snack Box</h4>
+              <p className="text-center text-white/70 text-sm mb-3">Paket cemilan dengan minuman</p>
+              <div className="text-center">
+                <span className="bg-[#7fb069]/20 text-[#7fb069] px-4 py-1 rounded-full text-sm">
+                  Rp 6.500
+                </span>
+              </div>
+            </div>
+
+            {/* Snack Satuan Card */}
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 cursor-pointer" onClick={() => { setActiveCategory("snack"); document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" }); }}>
+              <div className="w-16 h-16 bg-[#d4a574] rounded-full flex items-center justify-center mb-4 mx-auto">
+                <Cookie className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-center mb-2 text-white">Snack Satuan</h4>
+              <p className="text-center text-white/70 text-sm mb-3">Jajanan eceran pilihan</p>
+              <div className="text-center">
+                <span className="bg-[#d4a574]/20 text-[#d4a574] px-4 py-1 rounded-full text-sm">
+                  Rp 2.500/item
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Menu Section */}
+      <section className="py-20 px-4 bg-[#1a2332]" id="menu">
+        <div className="max-w-6xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-12">
+            <h2 className="mb-4 text-[#d4a574]">Menu Kami</h2>
+            <p className="text-white/70 mb-8">Pilih kategori menu favorit Anda</p>
+          </div>
+
+          {/* Category Navigation */}
+          <div className="flex flex-wrap justify-center gap-4 mb-16">
+            <button
+              onClick={() => setActiveCategory("all")}
+              className={`px-6 py-3 rounded-full transition-all duration-300 flex items-center gap-2 ${
+                activeCategory === "all"
+                  ? "bg-[#d4a574] text-[#1a2332] shadow-lg scale-105"
+                  : "bg-white/10 text-white/70 hover:bg-white/20"
+              }`}
+            >
+              <UtensilsCrossed className="w-5 h-5" />
+              Semua Menu
+            </button>
+            <button
+              onClick={() => setActiveCategory("nasibox")}
+              className={`px-6 py-3 rounded-full transition-all duration-300 flex items-center gap-2 ${
+                activeCategory === "nasibox"
+                  ? "bg-[#d4a574] text-[#1a2332] shadow-lg scale-105"
+                  : "bg-white/10 text-white/70 hover:bg-white/20"
+              }`}
+            >
+              <Sandwich className="w-5 h-5" />
+              Nasi Box
+            </button>
+            <button
+              onClick={() => setActiveCategory("snackbox")}
+              className={`px-6 py-3 rounded-full transition-all duration-300 flex items-center gap-2 ${
+                activeCategory === "snackbox"
+                  ? "bg-[#d4a574] text-[#1a2332] shadow-lg scale-105"
+                  : "bg-white/10 text-white/70 hover:bg-white/20"
+              }`}
+            >
+              <Cookie className="w-5 h-5" />
+              Snack Box
+            </button>
+            <button
+              onClick={() => setActiveCategory("snack")}
+              className={`px-6 py-3 rounded-full transition-all duration-300 flex items-center gap-2 ${
+                activeCategory === "snack"
+                  ? "bg-[#d4a574] text-[#1a2332] shadow-lg scale-105"
+                  : "bg-white/10 text-white/70 hover:bg-white/20"
+              }`}
+            >
+              <Cookie className="w-5 h-5" />
+              Snack Satuan
+            </button>
+          </div>
+
+          <div className="space-y-16">
+          {/* Menu Nasi Box */}
+          {(activeCategory === "all" || activeCategory === "nasibox") && (
+            <MenuNasiBox
+              sliderSettings={sliderSettings}
+              nasiBoxImages={nasiBoxImages}
+              addToCart={addToCart}
+            />
+          )}
+
+          {/* Menu Snack Box */}
+          {(activeCategory === "all" || activeCategory === "snackbox") && (
+            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-[1.02] transition-all duration-300 relative">
+              {/* Category Badge */}
+              <div className="absolute top-6 right-6 bg-[#7fb069] text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-lg z-10">
+                <Cookie className="w-4 h-4" />
+                <span className="text-sm">Snack Box</span>
+              </div>
+
+              <div className="p-8 md:p-12">
+                <div className="grid md:grid-cols-2 gap-8 items-start">
+                  {/* Menu Details */}
+                  <div className="order-2 md:order-1">
+                    <h3 className="mb-6 text-[#1a2332]">Menu Snack Box</h3>
+                    <p className="text-gray-600 mb-6">Paket cemilan lengkap dengan minuman. Cocok untuk acara santai atau meeting!</p>
+
+                    <div className="space-y-6">
+                      {/* Price and Items */}
+                      <div className="border-l-4 border-[#7fb069] pl-4 bg-[#f7faf6] p-4 rounded-r-lg">
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="text-sm text-gray-600">Paket Snack Box</span>
+                          <div className="bg-[#7fb069] text-white px-4 py-1 rounded-full">
+                            <span className="text-lg">Rp 6.500</span>
+                          </div>
+                        </div>
+
+                        <div className="mb-4">
+                          <p className="text-sm text-[#1a2332] mb-2">Isi paket:</p>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-white p-3 rounded-lg shadow-sm">
+                              <p className="text-sm text-gray-700">✓ Ayam Ayam</p>
+                            </div>
+                            <div className="bg-white p-3 rounded-lg shadow-sm">
+                              <p className="text-sm text-gray-700">✓ Donat Gula</p>
+                            </div>
+                            <div className="bg-white p-3 rounded-lg shadow-sm">
+                              <p className="text-sm text-gray-700">✓ Kletilon</p>
+                            </div>
+                            <div className="bg-white p-3 rounded-lg shadow-sm">
+                              <p className="text-sm text-gray-700">✓ Minum Cup 200ml</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Add to Cart Button */}
+                      <button
+                        onClick={() =>
+                          addToCart({
+                            id: "snackbox-6500",
+                            name: "Snack Box (Ayam Ayam, Donat Gula, Kletilon, Minum Cup)",
+                            price: 6500,
+                            category: "Snack Box"
+                          })
+                        }
+                        className="w-full bg-[#7fb069] text-white py-3 rounded-full hover:bg-[#6fa058] transition-colors shadow-lg flex items-center justify-center gap-2"
+                      >
+                        <Plus className="w-5 h-5" />
+                        Tambah ke Keranjang
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Carousel */}
+                  <div className="bg-white shadow-xl rounded-2xl overflow-hidden order-1 md:order-2">
+                    <Slider {...sliderSettings}>
+                      {snackImages.map((image, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={image.url}
+                            alt={image.caption}
+                            className="w-full aspect-square object-cover"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                            <p className="text-white text-sm text-center">{image.caption}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </Slider>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Menu Snack Satuan */}
+          {(activeCategory === "all" || activeCategory === "snack") && (
+            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-[1.02] transition-all duration-300 relative">
+              {/* Category Badge */}
+              <div className="absolute top-6 right-6 bg-[#d4a574] text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-lg z-10">
+                <Cookie className="w-4 h-4" />
+                <span className="text-sm">Snack Satuan</span>
+              </div>
+
+              <div className="p-8 md:p-12">
+                <div className="grid md:grid-cols-2 gap-8 items-start">
+                  {/* Carousel */}
+                  <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
+                    <Slider {...sliderSettings}>
+                      {snackSatuanImages.map((image, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={image.url}
+                            alt={image.caption}
+                            className="w-full aspect-square object-cover"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                            <p className="text-white text-sm text-center">{image.caption}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </Slider>
+                  </div>
+
+                  {/* Menu Details */}
+                  <div>
+                    <h3 className="mb-6 text-[#1a2332]">Menu Snack Satuan</h3>
+                    <p className="text-gray-600 mb-6">Pilih jajanan eceran favorit Anda. Cocok untuk teman ngopi atau belajar!</p>
+
+                    <div className="space-y-6">
+                      {/* Price Tag */}
+                      <div className="bg-gradient-to-r from-[#d4a574] to-[#c49563] text-white p-4 rounded-xl shadow-lg">
+                        <p className="text-sm mb-1">Harga Per Item</p>
+                        <p className="text-3xl">Rp 2.500</p>
+                      </div>
+
+                      {/* Snack Items Grid */}
+                      <div className="border-l-4 border-[#d4a574] pl-4 bg-[#fef9f3] p-4 rounded-r-lg">
+                        <p className="text-sm text-[#1a2332] mb-3">Pilihan Menu @ Rp 2.500:</p>
+                        <div className="grid grid-cols-1 gap-3 max-h-[500px] overflow-y-auto pr-2">
+                          {[
+                            "Ayam Ayam",
+                            "Tahu",
+                            "Risol Rogut",
+                            "Kroket",
+                            "Sosis",
+                            "Solo",
+                            "Pastel Ayam",
+                            "Pastel Rogut",
+                            "Samosa",
+                            "Tahu Isi",
+                            "Tahu Mercon",
+                            "Donat Gula",
+                            "Jentik Manis",
+                            "Puding"
+                          ].map((item, index) => (
+                            <div
+                              key={index}
+                              className="bg-white p-3 rounded-lg shadow-sm border border-gray-200 hover:border-[#d4a574] hover:bg-[#fef9f3] transition-all"
+                            >
+                              <div className="flex items-center justify-between gap-3">
+                                <span className="text-sm text-gray-700 flex-1">{item}</span>
+                                <button
+                                  onClick={() =>
+                                    addToCart({
+                                      id: `snack-${index}-${item.toLowerCase().replace(/\s+/g, "-")}`,
+                                      name: item,
+                                      price: 2500,
+                                      category: "Snack Satuan"
+                                    })
+                                  }
+                                  className="bg-[#d4a574] text-white py-1.5 px-4 rounded-lg hover:bg-[#c49563] transition-colors flex items-center justify-center gap-2 text-sm whitespace-nowrap"
+                                >
+                                  <Plus className="w-3 h-3" />
+                                  Pilih
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Info Box */}
+                      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                        <p className="text-sm text-blue-800">
+                          💡 <strong>Tips:</strong> Klik item yang Anda inginkan untuk menambahkan ke keranjang. Beli lebih banyak lebih hemat!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          </div>
+        </div>
+      </section>
+
+      {/* How to Order Section */}
+      <section id="how-to-order" className="py-16 px-4 bg-[#1e2838]">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-center mb-12 text-[#d4a574]">Cara Pemesanan</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Step 1 */}
+            <div className="text-center relative">
+              <div className="w-16 h-16 bg-[#d4a574] rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl shadow-lg">
+                1
+              </div>
+              <h4 className="mb-2 text-white">Pilih Menu</h4>
+              <p className="text-white/70 text-sm">Lihat kategori menu dan pilih yang Anda inginkan</p>
+              {/* Arrow for desktop */}
+              <div className="hidden md:block absolute top-8 -right-4 text-[#d4a574]/30">
+                <ChevronDown className="w-8 h-8 rotate-[-90deg]" />
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="text-center relative">
+              <div className="w-16 h-16 bg-[#d4a574] rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl shadow-lg">
+                2
+              </div>
+              <h4 className="mb-2 text-white">Hubungi Kami</h4>
+              <p className="text-white/70 text-sm">Klik tombol WhatsApp untuk melakukan pemesanan</p>
+              {/* Arrow for desktop */}
+              <div className="hidden md:block absolute top-8 -right-4 text-[#d4a574]/30">
+                <ChevronDown className="w-8 h-8 rotate-[-90deg]" />
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="text-center relative">
+              <div className="w-16 h-16 bg-[#d4a574] rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl shadow-lg">
+                3
+              </div>
+              <h4 className="mb-2 text-white">Konfirmasi</h4>
+              <p className="text-white/70 text-sm">Sebutkan menu, jumlah, dan lokasi pengiriman</p>
+              {/* Arrow for desktop */}
+              <div className="hidden md:block absolute top-8 -right-4 text-[#d4a574]/30">
+                <ChevronDown className="w-8 h-8 rotate-[-90deg]" />
+              </div>
+            </div>
+
+            {/* Step 4 */}
+            <div className="text-center">
+              <div className="w-16 h-16 bg-[#7fb069] rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl shadow-lg">
+                4
+              </div>
+              <h4 className="mb-2 text-white">Terima Pesanan</h4>
+              <p className="text-white/70 text-sm">Makanan akan diantar sesuai jadwal yang disepakati</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Info Banner */}
+      <section className="py-12 px-4 bg-gradient-to-r from-[#d4a574] to-[#c49563]">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+            <div className="flex flex-col items-center gap-2">
+              <Truck className="w-8 h-8 text-white" />
+              <p className="text-white">
+                <strong>Gratis Ongkir</strong><br />
+                <span className="text-sm text-white/90">Area kampus min. pembelian</span>
+              </p>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <Phone className="w-8 h-8 text-white" />
+              <p className="text-white">
+                <strong>Pesan Mudah</strong><br />
+                <span className="text-sm text-white/90">Via WhatsApp 24/7</span>
+              </p>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <Shield className="w-8 h-8 text-white" />
+              <p className="text-white">
+                <strong>Higienis & Aman</strong><br />
+                <span className="text-sm text-white/90">Proses bersih & terjamin</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Us Section */}
+      <section id="why-choose-us" className="py-20 px-4 bg-[#1a2332] relative">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-[#7fb069] rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-[#d4a574] rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          <h2 className="text-center mb-4 text-[#d4a574]">Kenapa Pilih Queensa?</h2>
+          <p className="text-center mb-16 text-white/80">
+            Keuntungan memesan katering dari kami
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {/* Free Delivery */}
+            <div className="text-center group">
+              <div className="w-24 h-24 bg-[#d4a574] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Truck className="w-12 h-12 text-[#1a2332]" />
+              </div>
+              <h3 className="mb-3 text-[#d4a574]">Gratis Ongkir Kampus</h3>
+              <p className="text-white/70">
+                Pengiriman gratis ke area kampus untuk pesanan minimal. Hemat lebih banyak!
+              </p>
+            </div>
+
+            {/* Student Price */}
+            <div className="text-center group">
+              <div className="w-24 h-24 bg-[#7fb069] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <DollarSign className="w-12 h-12 text-white" />
+              </div>
+              <h3 className="mb-3 text-[#d4a574]">Harga Mahasiswa</h3>
+              <p className="text-white/70">
+                Harga spesial untuk mahasiswa. Kualitas premium tanpa menguras dompet!
+              </p>
+            </div>
+
+            {/* Hygienic */}
+            <div className="text-center group">
+              <div className="w-24 h-24 bg-[#d4a574] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Shield className="w-12 h-12 text-[#1a2332]" />
+              </div>
+              <h3 className="mb-3 text-[#d4a574]">Higienis</h3>
+              <p className="text-white/70">
+                Diolah dengan standar kebersihan tinggi. Kesehatan Anda prioritas kami!
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-[#0f1419] text-white py-16 px-4 relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute bottom-0 left-0 w-48 h-48 opacity-20 pointer-events-none">
+          <svg viewBox="0 0 200 200" className="w-full h-full">
+            <path
+              d="M20,100 Q40,40 80,20 Q120,40 140,100 Q120,160 80,180 Q40,160 20,100"
+              fill="#7fb069"
+              opacity="0.5"
+            />
+          </svg>
+        </div>
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+            {/* Company Info */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                  <div className="text-[#1a2332] text-[8px] text-center">
+                    <div>QUEENSA</div>
+                    <div className="text-[6px]">CATERING</div>
+                  </div>
+                </div>
+                <h3 className="text-[#d4a574]">Queensa Catering</h3>
+              </div>
+              <p className="text-white/80">
+                Solusi katering praktis untuk mahasiswa dan kampus. Nikmat, terjangkau, dan selalu fresh!
+              </p>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h4 className="mb-4 text-[#d4a574]">Hubungi Kami</h4>
+              <div className="space-y-3">
+                <a
+                  href="https://wa.me/6288200860059"
+                  className="flex items-center gap-3 hover:text-[#d4a574] transition-colors"
+                >
+                  <MessageCircle className="w-5 h-5 text-[#7fb069]" />
+                  <span>0882-0086-0059</span>
+                </a>
+                <a
+                  href="tel:+6288200860059"
+                  className="flex items-center gap-3 hover:text-[#d4a574] transition-colors"
+                >
+                  <Phone className="w-5 h-5 text-[#7fb069]" />
+                  <span>0882-0086-0059</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Social Media */}
+            <div>
+              <h4 className="mb-4 text-[#d4a574]">Ikuti Kami</h4>
+              <div className="space-y-4">
+                <a
+                  href="https://instagram.com/queensa_catering"
+                  className="flex items-center gap-3 hover:text-[#d4a574] transition-colors"
+                >
+                  <Instagram className="w-5 h-5 text-[#7fb069]" />
+                  <span>@queensa_catering</span>
+                </a>
+                <div className="flex gap-4 mt-4">
+                  <a
+                    href="https://facebook.com"
+                    className="w-12 h-12 bg-[#d4a574]/10 rounded-full flex items-center justify-center hover:bg-[#d4a574]/20 transition-colors border border-[#d4a574]/30"
+                    aria-label="Facebook"
+                  >
+                    <Facebook className="w-6 h-6 text-[#d4a574]" />
+                  </a>
+                  <a
+                    href="https://instagram.com/queensa_catering"
+                    className="w-12 h-12 bg-[#d4a574]/10 rounded-full flex items-center justify-center hover:bg-[#d4a574]/20 transition-colors border border-[#d4a574]/30"
+                    aria-label="Instagram"
+                  >
+                    <Instagram className="w-6 h-6 text-[#d4a574]" />
+                  </a>
+                  <a
+                    href="https://wa.me/6288200860059"
+                    className="w-12 h-12 bg-[#7fb069]/10 rounded-full flex items-center justify-center hover:bg-[#7fb069]/20 transition-colors border border-[#7fb069]/30"
+                    aria-label="WhatsApp"
+                  >
+                    <MessageCircle className="w-6 h-6 text-[#7fb069]" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div className="text-center pt-8 border-t border-white/10">
+            <p className="text-white/60">
+              © 2026 Queensa Catering. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
